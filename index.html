@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Validation with Javascript</title>
+    <style>
+        body {
+            font: 1em sans-serif;
+            width: 400px;
+            padding: 0;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        p * {
+            display: block;
+        }
+
+        input, select {
+            appearance: none;
+            width: 80%;
+            border: 1px solid #333333;
+            margin: 0;
+            font-family: inherit;
+            font-size: 90%;
+            box-sizing: border-box;
+        }
+
+        /* invalid fields */
+        input:user-invalid,
+        select:user-invalid {
+            border-color: #990000;
+            border-width: 3px;
+            background-color: #ffdddd;
+        }
+
+        /* valid fields */
+            input:user-valid,
+            select:user-valid {
+            border-color: green;
+            border-width: 2px;
+            background-color: #ddffdd;
+        }
+
+
+        input:focus:user-invalid {
+            outline: none;
+        }
+
+        /* error message styles */
+        .error {
+            width: 80%;
+            padding: 0;
+            font-size: 80%;
+            color: white;
+            background-color: #9e4747;
+            border-radius: 0 0 5px 5px;
+            box-sizing: border-box;
+        }
+
+        .error.active {
+            padding: 0.8em;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Form Validation Exercise using Javascript</h1>
+
+<form id="registrationForm" novalidate>
+
+    <p>
+        <label for="email">Email</label>
+        <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            minlength="8"
+        >
+        <span class="error" aria-live="polite"></span>
+    </p>
+
+    <p>
+        <label for="country">Country</label>
+        <select id="country" name="country" required>
+            <option value="">Select your country</option>
+            <option value="IN">India</option>
+            <option value="NL">Dutch</option>
+            <option value="DE">Germany</option>
+            <option value="FR">France</option>
+        </select>
+        <span class="error" aria-live="polite"></span>
+    </p>
+
+    <p>
+        <label for="postalCode">Postal Code</label>
+        <input
+            type="text"
+            id="postalCode"
+            name="postalCode"
+            required
+        >
+        <span class="error" aria-live="polite"></span>
+    </p>
+
+    <p>
+        <label for="password">Password</label>
+        <input
+            type="password"
+            id="password"
+            name="password"
+            required
+            minlength="8"
+        >
+        <span class="error" aria-live="polite"></span>
+    </p>
+
+    <p>
+        <label for="passwordConfirmation">Confirm Password</label>
+        <input
+            type="password"
+            id="passwordConfirmation"
+            name="passwordConfirmation"
+            required
+            minlength="8"
+        >
+        <span class="error" aria-live="polite"></span>
+    </p>
+
+    <button type="submit">Create Account</button>
+
+</form>
+
+<script>
+
+const form = document.querySelector("form");
+
+const email = document.getElementById("email");
+const emailError = document.querySelector("#email + span.error");
+
+const countrySelect = document.getElementById("country");
+const countryError = document.querySelector("#country + span.error");
+
+const postalCode = document.getElementById("postalCode");
+const postalCodeError = document.querySelector("#postalCode + span.error");
+
+const password = document.getElementById("password");
+const passwordError = document.querySelector("#password + span.error");
+
+const passwordConfirmation = document.getElementById("passwordConfirmation");
+const passwordConfirmationError = document.querySelector("#passwordConfirmation + span.error");
+
+
+function validateEmailField() {
+    if (email.validity.valid) {
+        emailError.textContent = "";
+        emailError.className = "error";
+        return true
+    } 
+    else {
+        showEmailError();
+        return false
+    }
+}
+
+
+function validateCountryField() {
+    if (!countrySelect.validity.valueMissing){
+        countryError.textContent = "";
+        countryError.className = "error";
+
+        return true
+    }
+    else {
+        showCountryError()
+        return false
+    }
+}
+
+
+function validatePostalCodeField() {
+    if (validatePostalCode()) {
+        postalCodeError.textContent = "";
+        postalCodeError.className = "error";
+        return true
+    }
+    else {
+        showPostalCodeError();
+        return false
+    }
+}
+
+
+function validatePasswordField() {
+    if (password.validity.valid && passwordRegExp.test(password.value)) {
+        passwordError.textContent = "";
+        passwordError.className = "error";
+        return true
+    }
+    else {
+        showPasswordError();
+        return false
+    }
+}
+
+
+function validatePasswordConfirmationField() {
+    if (passwordConfirmation.validity.valid && 
+        passwordRegExp.test(passwordConfirmation.value) 
+        && (passwordConfirmation.value) === (password.value)) {
+
+        passwordConfirmationError.textContent = "";
+        passwordConfirmationError.className = "error";
+
+        return true
+    }
+    else {
+        showPasswordConfirmationError();
+        return false
+    }
+}
+
+
+email.addEventListener("input", (event) => {
+    validateEmailField();
+});
+
+
+countrySelect.addEventListener("change", (event) => {
+    // validateCountryField();
+    // validatePostalCodeField();
+    const countryValid = validateCountryField();
+
+    if (countryValid) {
+        validatePostalCodeField();
+    }
+    else {
+        postalCodeError.textContent = "";
+        postalCodeError.className = "error"
+    }
+});
+
+
+postalCode.addEventListener("input", (event) => {
+    const countryValid = validateCountryField();
+
+    if (countryValid) {
+        validatePostalCodeField();
+    }
+    else {
+        postalCodeError.textContent = "";
+        postalCodeError.className = "error"
+    }
+});
+
+
+password.addEventListener("input", (event) => {
+
+    validatePasswordField();
+    validatePasswordConfirmationField();
+});
+
+
+passwordConfirmation.addEventListener("input", (event) => {
+
+    validatePasswordConfirmationField();
+});
+
+
+form.addEventListener("submit", (event) => {
+
+    const emailValid = validateEmailField();
+    const countryValid = validateCountryField();
+    const postalCodeValid = validatePostalCodeField();
+    const passwordValid = validatePasswordField();
+    const passwordConfirmationValid = validatePasswordConfirmationField();
+
+    if (!emailValid || !postalCodeValid || !countryValid ||
+        !passwordValid || !passwordConfirmationValid) {
+        console.log('Validation failed...Form is not submitted')
+        event.preventDefault();
+    }
+    else {
+        console.log('Validation passed...Form is submitted')
+    }
+});
+
+
+function showEmailError() {
+    if (email.validity.valueMissing) {
+        // If empty
+        emailError.textContent = "You need to enter an email address.";
+    } else if (email.validity.typeMismatch) {
+        // If it's not an email address,
+        emailError.textContent = "Entered value needs to be an email address.";
+    } else if (email.validity.tooShort) {
+        // If the value is too short,
+        emailError.textContent = `Email should be at least ${email.minLength} characters; you entered ${email.value.length}.`;
+    }
+
+    // Add the `active` class
+    emailError.className = "error active";
+}
+
+
+function showPostalCodeError() {
+        if (countrySelect.validity.valueMissing) {
+            postalCodeError.textContent = "You need to enter your country first";
+            postalCodeError.className = "error active"
+        }
+        else {
+            postalCodeError.textContent = postalErrorMessage;
+        }
+
+    postalCodeError.className = "error active";
+}
+
+function showCountryError() {
+    if ((countrySelect.validity.valueMissing) || (countrySelect.value === '')) {
+        countryError.textContent = "You need to enter your country";
+    }
+    countryError.className = "error active"
+}
+
+
+const passwordRegExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+
+function showPasswordError() {
+    if (password.validity.valueMissing) {
+        // If empty
+        passwordError.textContent = "You need to enter a password";
+    } else if (password.validity.tooShort) {
+        // If the value is too short,
+        passwordError.textContent = `Password should be at least ${password.minLength} characters; you entered ${password.value.length}.`;
+    }
+    else if (!passwordRegExp.test(password.value)) {
+        passwordError.textContent = "Password must contain at least 8 characters, including uppercase, lowercase, a number, and a special character."
+    }
+
+    // Add the `active` class
+    passwordError.className = "error active";
+}
+
+
+function showPasswordConfirmationError() {
+    if (passwordConfirmation.validity.valueMissing) {
+        // If empty
+        passwordConfirmationError.textContent = "You need to confirm your password";
+    } else if (passwordConfirmation.validity.tooShort) {
+        // If the value is too short,
+        passwordConfirmationError.textContent = `Password should be at least ${password.minLength} characters; you entered ${passwordConfirmation.value.length}.`;
+    }
+    else if (!passwordRegExp.test(passwordConfirmation.value)) {
+        passwordConfirmationError.textContent = "Password must contain at least 8 characters, including uppercase, lowercase, a number, and a special character."
+    }
+    else if((passwordConfirmation.value)!==(password.value)) {
+        passwordConfirmationError.textContent = "Passwords do not match"
+    }
+
+    // Add the `active` class
+    passwordConfirmationError.className = "error active";
+}
+
+
+let postalErrorMessage;
+let countryErrorMessage;
+
+function validatePostalCode() {
+    // For each country, defines the pattern that the postal code has to follow
+    const constraints = {
+        IN: [
+            "^(IN-)?\\d{6}$",
+            "India postal codes must have exactly 6 digits: e.g. 781950",
+        ],
+        FR: [
+            "^(F-)?\\d{5}$",
+            "French postal codes must have exactly 5 digits: e.g. F-75012 or 75012",
+        ],
+        DE: [
+            "^(D-)?\\d{5}$",
+            "German postal codes must have exactly 5 digits: e.g. D-12345 or 12345",
+        ],
+        NL: [
+            "^(NL-)?\\d{4}\\s*([A-RT-Z][A-Z]|S[BCE-RT-Z])$",
+            "Dutch postal codes must have exactly 4 digits, followed by 2 letters except SA, SD and SS",
+        ],
+    };
+
+
+    if (countrySelect.validity.valueMissing){
+        // If no country is selected
+        countryErrorMessage = "You need to enter your country"
+        postalErrorMessage = ""
+        // countryError.textContent = "You need to enter your country";
+        // countryError.className = "error active"
+
+        return false
+    }
+
+    // Read the country id
+    const country = countrySelect.value;
+
+    // Build the constraint checker
+    const constraint = new RegExp(constraints[country][0], "");
+
+    // Check it!
+    if (!constraint.test(postalCode.value)) {
+        // The postal code follows the constraint, we use the ConstraintAPI to tell it
+        // postalCodeField.setCustomValidity("");
+        postalErrorMessage = constraints[country][1];
+        return false
+    }
+    else if (postalCode.validity.valueMissing) {
+        return false
+    }
+
+    else {
+        // The postal code doesn't follow the constraint, we use the ConstraintAPI to
+        // give a message about the format required for this country
+        return true
+    }
+}
+
+</script>
+</body>
+</html>
